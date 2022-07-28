@@ -1,5 +1,7 @@
 package com.mobiledv.noteapp.feature_note.presentation.add_edit_note
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,8 +11,6 @@ import com.mobiledv.noteapp.feature_note.domain.model.Note
 import com.mobiledv.noteapp.feature_note.domain.use_case.NoteUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,14 +20,19 @@ class AddEditNoteViewModel @Inject constructor(
     private val noteUseCases: NoteUseCases,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val _noteTitle = MutableStateFlow(NoteTExtFieldState(hint = "Enter title..."))
-    val noteTitle: StateFlow<NoteTExtFieldState> = _noteTitle
 
-    private val _noteContent = MutableStateFlow(NoteTExtFieldState(hint = "Enter some content..."))
-    val noteContent: StateFlow<NoteTExtFieldState> = _noteContent
+    private val _noteTitle = mutableStateOf(TextFieldState(
+        hint = "Enter title..."
+    ))
+    val noteTitle: State<TextFieldState> = _noteTitle
 
-    private val _noteColor = MutableStateFlow<Int>(Note.noteColors.random().toArgb())
-    val noteColor: StateFlow<Int> = _noteColor
+    private val _noteContent = mutableStateOf(TextFieldState(
+        hint = "Enter some content"
+    ))
+    val noteContent: State<TextFieldState> = _noteContent
+
+    private val _noteColor = mutableStateOf(Note.noteColors.random().toArgb())
+    val noteColor: State<Int> = _noteColor
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()

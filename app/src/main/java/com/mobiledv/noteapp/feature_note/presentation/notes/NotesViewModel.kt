@@ -1,5 +1,7 @@
 package com.mobiledv.noteapp.feature_note.presentation.notes
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobiledv.noteapp.feature_note.domain.model.Note
@@ -8,8 +10,6 @@ import com.mobiledv.noteapp.feature_note.domain.util.NoteOrder
 import com.mobiledv.noteapp.feature_note.domain.util.OrderType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -20,8 +20,8 @@ class NotesViewModel @Inject constructor(
     private val noteUseCases: NoteUseCases
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(NoteState())
-    val state: StateFlow<NoteState> = _state
+    private val _state = mutableStateOf(NotesState())
+    val state: State<NotesState> = _state
 
     private var recentlyDeletedNote: Note? = null
 
@@ -31,9 +31,9 @@ class NotesViewModel @Inject constructor(
         getNotes(NoteOrder.Date(OrderType.Descending))
     }
 
-    fun onEvent(event: NoteEvent) {
+    fun onEvent(event: NotesEvent) {
         when (event) {
-            is NoteEvent.Order -> {
+            is NotesEvent.Order -> {
                 if (state.value.noteOrder::class == event.noteOrder::class &&
                     state.value.noteOrder.orderType == event.noteOrder.orderType
                 ) {
@@ -41,19 +41,19 @@ class NotesViewModel @Inject constructor(
                 }
                 getNotes(event.noteOrder)
             }
-            is NoteEvent.DeleteNote -> {
+            is NotesEvent.DeleteNotes -> {
                 viewModelScope.launch {
                     noteUseCases.deleteNote(event.note)
                     recentlyDeletedNote = event.note
                 }
             }
-            is NoteEvent.RestoreNote -> {
+            is NotesEvent.RestoreNotes -> {
                 viewModelScope.launch {
                     noteUseCases.addNote(recentlyDeletedNote ?: return@launch)
                     recentlyDeletedNote = null
                 }
             }
-            is NoteEvent.ToggleOrderSection -> {
+            is NotesEvent.ToggleOrderSection -> {
                 _state.value = state.value.copy(
                     isOrderSectionVisible = !state.value.isOrderSectionVisible
                 )

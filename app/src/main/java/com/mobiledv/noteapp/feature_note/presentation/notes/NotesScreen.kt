@@ -60,7 +60,7 @@ fun NotesScreen(
             ) {
                 Text(text = "Your note", style = MaterialTheme.typography.h4)
                 IconButton(onClick = {
-                    viewModel.onEvent(NoteEvent.ToggleOrderSection)
+                    viewModel.onEvent(NotesEvent.ToggleOrderSection)
                 }) {
                     Icon(imageVector = Icons.Default.Sort, contentDescription = "")
                 }
@@ -74,7 +74,7 @@ fun NotesScreen(
                     .padding(16.dp),
                     noteOrder = state.noteOrder,
                     onOrderChange = {
-                        viewModel.onEvent(NoteEvent.Order(it))
+                        viewModel.onEvent(NotesEvent.Order(it))
                     }
                 )
             }
@@ -89,14 +89,14 @@ fun NotesScreen(
                                 navController.navigate(Screen.AddEditNoteScreen.route+"?noteId=${note.id}&noteColor${note.color}")
                             },
                         onDeleteClick = {
-                            viewModel.onEvent(NoteEvent.DeleteNote(note))
+                            viewModel.onEvent(NotesEvent.DeleteNotes(note))
                             scope.launch {
                                 val result = scaffoldState.snackbarHostState.showSnackbar(
                                     "Note deleted",
                                     actionLabel = "Undo"
                                 )
                                 if (result == SnackbarResult.ActionPerformed) {
-                                    viewModel.onEvent(NoteEvent.RestoreNote)
+                                    viewModel.onEvent(NotesEvent.RestoreNotes)
                                 }
                             }
                         },
