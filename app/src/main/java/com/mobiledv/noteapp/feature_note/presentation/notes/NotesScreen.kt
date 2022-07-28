@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.mobiledv.noteapp.feature_note.presentation.notes.components.NoteItem
 import com.mobiledv.noteapp.feature_note.presentation.notes.components.OrderSection
+import com.mobiledv.noteapp.feature_note.presentation.util.Screen
 import kotlinx.coroutines.launch
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -36,7 +37,7 @@ fun NotesScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-
+                    navController.navigate(Screen.AddEditNoteScreen.route)
                 },
                 backgroundColor = MaterialTheme.colors.primary,
             ) {
@@ -62,7 +63,6 @@ fun NotesScreen(
                     viewModel.onEvent(NoteEvent.ToggleOrderSection)
                 }) {
                     Icon(imageVector = Icons.Default.Sort, contentDescription = "")
-
                 }
             }
             AnimatedVisibility(
@@ -86,7 +86,7 @@ fun NotesScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-
+                                navController.navigate(Screen.AddEditNoteScreen.route+"?noteId=${note.id}&noteColor${note.color}")
                             },
                         onDeleteClick = {
                             viewModel.onEvent(NoteEvent.DeleteNote(note))

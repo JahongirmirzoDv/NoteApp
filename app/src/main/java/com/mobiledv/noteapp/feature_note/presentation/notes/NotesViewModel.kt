@@ -25,7 +25,7 @@ class NotesViewModel @Inject constructor(
 
     private var recentlyDeletedNote: Note? = null
 
-    private val getNotesJob: Job? = null
+    private var getNotesJob: Job? = null
 
     init {
         getNotes(NoteOrder.Date(OrderType.Descending))
@@ -39,6 +39,7 @@ class NotesViewModel @Inject constructor(
                 ) {
                     return
                 }
+                getNotes(event.noteOrder)
             }
             is NoteEvent.DeleteNote -> {
                 viewModelScope.launch {
@@ -62,11 +63,13 @@ class NotesViewModel @Inject constructor(
 
     private fun getNotes(noteOrder: NoteOrder) {
         getNotesJob?.cancel()
-        noteUseCases.getNotes(noteOrder).onEach {
-            _state.value = state.value.copy(
-                notes = it,
-                noteOrder = noteOrder
-            )
-        }.launchIn(viewModelScope)
+        getNotesJob = noteUseCases.getNotes(noteOrder)
+            .onEach { notes ->
+                _state.value = state.value.copy(
+                    notes = notes,
+                    noteOrder = noteOrder
+                )
+            }
+            .launchIn(viewModelScope)
     }
 }
