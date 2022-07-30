@@ -9,6 +9,7 @@ import com.mobiledv.noteapp.feature_note.domain.use_case.NoteUseCases
 import com.mobiledv.noteapp.feature_note.domain.util.NoteOrder
 import com.mobiledv.noteapp.feature_note.domain.util.OrderType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -17,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotesViewModel @Inject constructor(
-    private val noteUseCases: NoteUseCases
+    private val noteUseCases: dagger.Lazy<NoteUseCases>
 ) : ViewModel() {
 
     private val _state = mutableStateOf(NotesState())
@@ -42,14 +43,14 @@ class NotesViewModel @Inject constructor(
                 getNotes(event.noteOrder)
             }
             is NotesEvent.DeleteNotes -> {
-                viewModelScope.launch {
-                    noteUseCases.deleteNote(event.note)
+                viewModelScope.launch(Dispatchers.IO) {
+                    noteUseCases.get().deleteNote(event.note)
                     recentlyDeletedNote = event.note
                 }
             }
             is NotesEvent.RestoreNotes -> {
-                viewModelScope.launch {
-                    noteUseCases.addNote(recentlyDeletedNote ?: return@launch)
+                viewModelScope.launch(Dispatchers.IO) {
+                    noteUseCases.get().addNote(recentlyDeletedNote ?: return@launch)
                     recentlyDeletedNote = null
                 }
             }
@@ -63,7 +64,7 @@ class NotesViewModel @Inject constructor(
 
     private fun getNotes(noteOrder: NoteOrder) {
         getNotesJob?.cancel()
-        getNotesJob = noteUseCases.getNotes(noteOrder)
+        getNotesJob = noteUseCases.get().getNotes(noteOrder)
             .onEach { notes ->
                 _state.value = state.value.copy(
                     notes = notes,

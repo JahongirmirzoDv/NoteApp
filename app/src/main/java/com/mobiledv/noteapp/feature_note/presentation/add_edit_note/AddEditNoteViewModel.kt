@@ -10,6 +10,7 @@ import com.mobiledv.noteapp.feature_note.domain.model.InvalidNoteException
 import com.mobiledv.noteapp.feature_note.domain.model.Note
 import com.mobiledv.noteapp.feature_note.domain.use_case.NoteUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -17,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddEditNoteViewModel @Inject constructor(
-    private val noteUseCases: NoteUseCases,
+    private val noteUseCases: dagger.Lazy<NoteUseCases>,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -42,8 +43,8 @@ class AddEditNoteViewModel @Inject constructor(
     init {
         savedStateHandle.get<Int>("noteId")?.let { noteId ->
             if(noteId != -1) {
-                viewModelScope.launch {
-                    noteUseCases.getNote(noteId)?.also { note ->
+                viewModelScope.launch(Dispatchers.IO) {
+                    noteUseCases.get().getNote(noteId)?.also { note ->
                         currentNoteId = note.id
                         _noteTitle.value = noteTitle.value.copy(
                             text = note.title,
@@ -88,9 +89,9 @@ class AddEditNoteViewModel @Inject constructor(
                 _noteColor.value = event.color
             }
             is AddEditNoteEvent.SaveNote -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     try {
-                        noteUseCases.addNote(
+                        noteUseCases.get().addNote(
                             Note(
                                 title = noteTitle.value.text,
                                 content = noteContent.value.text,
