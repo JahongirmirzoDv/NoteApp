@@ -1,6 +1,7 @@
 package com.mobiledv.noteapp.di
 
 import android.app.Application
+import android.os.Looper
 import androidx.room.Room
 import com.mobiledv.noteapp.feature_note.data.data_source.NoteDatabase
 import com.mobiledv.noteapp.feature_note.data.repository.NoteRepositoryImpl
@@ -36,6 +37,10 @@ object AppModule {
 
     @Provides
     fun provideNoteUseCases(repository: NoteRepository):NoteUseCases{
+        require(Looper.myLooper() != Looper.getMainLooper()){
+            "MAin thread"
+        }
+
         return NoteUseCases(
             getNotes = GetNotes(repository),
             deleteNote = DeleteNote(repository),
