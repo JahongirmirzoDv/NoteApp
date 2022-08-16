@@ -38,7 +38,7 @@ object AppModule {
     @Provides
     fun provideNoteUseCases(repository: NoteRepository):NoteUseCases{
         require(Looper.myLooper() != Looper.getMainLooper()){
-            "MAin thread"
+            "Main thread"
         }
 
         return NoteUseCases(
