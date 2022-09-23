@@ -45,9 +45,7 @@ fun NotesScreen(
             }
         },
         scaffoldState = scaffoldState,
-
         ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -105,7 +103,5 @@ fun NotesScreen(
                 }
             }
         }
-
-
     }
 }
