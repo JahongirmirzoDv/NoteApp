@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,14 +23,18 @@ class AddEditNoteViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _noteTitle = mutableStateOf(TextFieldState(
-        hint = "Enter title..."
-    ))
+    private val _noteTitle = mutableStateOf(
+        TextFieldState(
+            hint = "Enter title..."
+        )
+    )
     val noteTitle: State<TextFieldState> = _noteTitle
 
-    private val _noteContent = mutableStateOf(TextFieldState(
-        hint = "Enter some content"
-    ))
+    private val _noteContent = mutableStateOf(
+        TextFieldState(
+            hint = "Enter some content"
+        )
+    )
     val noteContent: State<TextFieldState> = _noteContent
 
     private val _noteColor = mutableStateOf(Note.noteColors.random().toArgb())
@@ -42,19 +47,21 @@ class AddEditNoteViewModel @Inject constructor(
 
     init {
         savedStateHandle.get<Int>("noteId")?.let { noteId ->
-            if(noteId != -1) {
+            if (noteId != -1) {
                 viewModelScope.launch(Dispatchers.IO) {
                     noteUseCases.get().getNote(noteId)?.also { note ->
-                        currentNoteId = note.id
-                        _noteTitle.value = noteTitle.value.copy(
-                            text = note.title,
-                            isHintVisible = false
-                        )
-                        _noteContent.value = _noteContent.value.copy(
-                            text = note.content,
-                            isHintVisible = false
-                        )
-                        _noteColor.value = note.color
+                        withContext(Dispatchers.Main){
+                            currentNoteId = note.id
+                            _noteTitle.value = noteTitle.value.copy(
+                                text = note.title,
+                                isHintVisible = false
+                            )
+                            _noteContent.value = _noteContent.value.copy(
+                                text = note.content,
+                                isHintVisible = false
+                            )
+                            _noteColor.value = note.color
+                        }
                     }
                 }
             }
@@ -62,7 +69,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun onEvent(event: AddEditNoteEvent) {
-        when(event) {
+        when (event) {
             is AddEditNoteEvent.EnteredTitle -> {
                 _noteTitle.value = noteTitle.value.copy(
                     text = event.value
@@ -101,7 +108,7 @@ class AddEditNoteViewModel @Inject constructor(
                             )
                         )
                         _eventFlow.emit(UiEvent.SaveNote)
-                    } catch(e: InvalidNoteException) {
+                    } catch (e: InvalidNoteException) {
                         _eventFlow.emit(
                             UiEvent.ShowSnackbar(
                                 message = e.message ?: "Couldn't save note"
@@ -114,7 +121,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     sealed class UiEvent {
-        data class ShowSnackbar(val message: String): UiEvent()
-        object SaveNote: UiEvent()
+        data class ShowSnackbar(val message: String) : UiEvent()
+        object SaveNote : UiEvent()
     }
 }
