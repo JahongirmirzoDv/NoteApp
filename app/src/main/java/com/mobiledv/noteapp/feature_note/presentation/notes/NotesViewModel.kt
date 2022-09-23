@@ -1,7 +1,9 @@
 package com.mobiledv.noteapp.feature_note.presentation.notes
 
+import android.graphics.Color.parseColor
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobiledv.noteapp.feature_note.domain.model.Note
